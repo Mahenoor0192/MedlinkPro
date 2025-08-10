@@ -1,9 +1,9 @@
 import {
-    AntDesign,
-    Entypo,
-    Feather,
-    FontAwesome,
-    MaterialIcons,
+  AntDesign,
+  Entypo,
+  Feather,
+  FontAwesome,
+  MaterialIcons,
 } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
@@ -11,19 +11,20 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
-    Animated,
-    Image,
-    Keyboard,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    View,
+  Animated,
+  Image,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
 } from "react-native";
+import validator from "validator";
 
 export default function FormScreen1() {
   const router = useRouter();
@@ -35,8 +36,21 @@ export default function FormScreen1() {
   const [bloodGroup, setBloodGroup] = useState("");
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [focusedField, setFocusedField] = useState("");
+  const [emailError, setEmailError] = useState("");
 
   const animatedValue = useRef(new Animated.Value(0)).current;
+
+  // Email validation
+  const isValidEmail = (email: string) => {
+    return validator.isEmail(email.trim(), {
+      domain_specific_validation: true, // Checks popular domains like gmail, yahoo
+      allow_utf8_local_part: false, // Restricts weird unicode characters
+    });
+  };
+
+  // Form validation
+  const isFormValid =
+    name.trim() && isValidEmail(email) && dob && gender && bloodGroup;
 
   useEffect(() => {
     Animated.loop(
@@ -74,7 +88,7 @@ export default function FormScreen1() {
             </View>
             <View style={styles.progressBarBackground}>
               <LinearGradient
-                colors={["#0284C5", "#11C0B2"]}
+                colors={["#0DB1E8", "#11C0B2"]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={styles.progressBarFill}
@@ -104,7 +118,7 @@ export default function FormScreen1() {
             Tell us about yourself to personalize your health journey
           </Text>
 
-          {/* Inputs */}
+          {/* Name Input */}
           <View
             style={[
               styles.inputWrapper,
@@ -127,10 +141,12 @@ export default function FormScreen1() {
             />
           </View>
 
+          {/* Email Input */}
           <View
             style={[
               styles.inputWrapper,
               focusedField === "email" && styles.inputFocused,
+              emailError && { borderColor: "red" },
             ]}
           >
             <Feather
@@ -143,13 +159,25 @@ export default function FormScreen1() {
               placeholder="Enter your email address"
               style={styles.input}
               value={email}
-              onChangeText={setEmail}
+              onChangeText={(text) => {
+                setEmail(text);
+                setEmailError(
+                  text && !isValidEmail(text)
+                    ? "Please enter a valid email"
+                    : ""
+                );
+              }}
               keyboardType="email-address"
               onFocus={() => setFocusedField("email")}
               onBlur={() => setFocusedField("")}
+              autoCapitalize="none"
             />
           </View>
+          {emailError ? (
+            <Text style={styles.errorText}>{emailError}</Text>
+          ) : null}
 
+          {/* Date of Birth */}
           <TouchableOpacity
             style={styles.inputWrapper}
             onPress={() => setShowDatePicker(true)}
@@ -160,9 +188,15 @@ export default function FormScreen1() {
               color="#0284C5"
               style={styles.icon}
             />
-    
-            <Text style={[styles.input, { alignItems: "center", }]}>
-              {dob ? dob.toDateString() : "Pick your birth date"}
+            <Text style={[styles.input, { alignItems: "center" }]}>
+              {dob
+                ? dob.toLocaleDateString("en-US", {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })
+                : " Pick your birth date"}
             </Text>
           </TouchableOpacity>
 
@@ -170,6 +204,7 @@ export default function FormScreen1() {
             <DateTimePicker
               mode="date"
               value={dob || new Date()}
+              maximumDate={new Date()}
               onChange={(_, date) => {
                 setShowDatePicker(false);
                 if (date) setDob(date);
@@ -177,6 +212,7 @@ export default function FormScreen1() {
             />
           )}
 
+          {/* Gender & Blood Group */}
           <View style={styles.pickerRow}>
             <View style={styles.pickerWrapper}>
               <Feather
@@ -185,16 +221,6 @@ export default function FormScreen1() {
                 color="#0284C5"
                 style={styles.icon}
               />
-              {/* <Picker
-                selectedValue={gender}
-                onValueChange={(itemValue) => setGender(itemValue)}
-                style={styles.picker}
-              >
-                <Picker.Item label="Select gender" value="" />
-                <Picker.Item label="Male" value="male" />
-                <Picker.Item label="Female" value="female" />
-                <Picker.Item label="Other" value="other" />
-              </Picker> */}
               <Picker
                 selectedValue={gender}
                 onValueChange={(itemValue) => setGender(itemValue)}
@@ -230,12 +256,21 @@ export default function FormScreen1() {
               <Picker
                 selectedValue={bloodGroup}
                 onValueChange={(itemValue) => setBloodGroup(itemValue)}
-                style={styles.picker}
+                style={[
+                  styles.picker,
+                  bloodGroup ? styles.pickerSelected : null,
+                ]}
+                dropdownIconColor="#0284C5"
               >
-                <Picker.Item label="Blood type" value="" />
+                <Picker.Item label="Blood type" value="" color="#888" />
                 {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map(
                   (type) => (
-                    <Picker.Item key={type} label={type} value={type} />
+                    <Picker.Item
+                      key={type}
+                      label={type}
+                      value={type}
+                      color={bloodGroup === type ? "#0284C5" : "#333"}
+                    />
                   )
                 )}
               </Picker>
@@ -248,12 +283,22 @@ export default function FormScreen1() {
               disabled
               style={[styles.navButton, styles.disabledButton]}
             >
-              <Text style={styles.navButtonText}>Previous</Text>
+              <Text style={[styles.navButtonText, { color: "#cccbcbff" }]}>
+                Previous
+              </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={handleNext} style={{ borderRadius: 30 }}>
+            <TouchableOpacity
+              onPress={isFormValid ? handleNext : null}
+              style={{ borderRadius: 30 }}
+              disabled={!isFormValid}
+            >
               <LinearGradient
-                colors={["#0DB1E8", "#11C0B2"]}
+                colors={
+                  isFormValid
+                    ? ["#0DB1E8", "#11C0B2"]
+                    : ["#abd7e6ff", "#abe6e2ff"]
+                }
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={styles.nextButton}
@@ -276,48 +321,31 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     flexGrow: 1,
   },
-  progressContainer: {
-    marginBottom: 80,
-  },
+  progressContainer: { marginBottom: 80 },
   progressTextRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 6,
   },
-  stepText: {
-    color: "#0284C5",
-    fontWeight: "600",
-    fontSize: 14,
-  },
-  percentText: {
-    color: "#999",
-    fontSize: 12,
-  },
+  stepText: { color: "#0284C5", fontWeight: "600", fontSize: 14 },
+  percentText: { color: "#999", fontSize: 12 },
   progressBarBackground: {
     height: 6,
     backgroundColor: "#eee",
     borderRadius: 20,
     overflow: "hidden",
   },
-  progressBarFill: {
-    width: "25%",
-    height: 6,
-    borderRadius: 20,
-  },
+  progressBarFill: { width: "25%", height: 6, borderRadius: 20 },
   avatarWrapper: {
     alignSelf: "center",
     marginBottom: 20,
     position: "relative",
   },
-  avatar: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-  },
+  avatar: { width: 120, height: 120, borderRadius: 60 },
   wave: {
     position: "absolute",
-    right: -10,
-    top: -10,
+    right: 0,
+    // top: -10,
     backgroundColor: "#0284C5",
     width: 32,
     height: 32,
@@ -325,10 +353,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  waveEmoji: {
-    fontSize: 18,
-    color: "#fff",
-  },
+  waveEmoji: { fontSize: 18, color: "#fff" },
   title: {
     fontSize: 22,
     fontWeight: "bold",
@@ -336,11 +361,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 6,
   },
-  subtitle: {
-    textAlign: "center",
-    color: "#888",
-    marginBottom: 20,
-  },
+  subtitle: { textAlign: "center", color: "#888", marginBottom: 20 },
   inputWrapper: {
     flexDirection: "row",
     alignItems: "center",
@@ -348,21 +369,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 12,
     paddingHorizontal: 10,
-    marginBottom: 15,
+    marginBottom: 10,
     height: 50,
   },
-  inputFocused: {
-    borderColor: "#0DB1E8",
-    borderWidth: 1.5,
-  },
-  icon: {
-    marginRight: 8,
-  },
-  input: {
-    flex: 1,
-    fontSize: 16,
-    color: "#333",
-  },
+  inputFocused: { borderColor: "#0DB1E8", borderWidth: 1.5 },
+  icon: { marginRight: 8 },
+  input: { flex: 1, fontSize: 16, color: "#333" },
+  errorText: { color: "red", fontSize: 12, marginBottom: 8 },
   pickerRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -382,11 +395,12 @@ const styles = StyleSheet.create({
   picker: {
     flex: 1,
     color: "#333",
+    // backgroundColor: "#fff",
   },
 
   pickerSelected: {
     fontWeight: "bold",
-    color: "#000",
+    color: "#0284C5",
   },
 
   buttonRow: {
@@ -401,9 +415,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 30,
   },
-  disabledButton: {
-    backgroundColor: "#f0f0f0",
-  },
+  disabledButton: { backgroundColor: "#f0f0f0" },
   nextButton: {
     flexDirection: "row",
     justifyContent: "center",
@@ -412,7 +424,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 30,
   },
-
   navButtonText: {
     color: "#fff",
     fontWeight: "bold",
