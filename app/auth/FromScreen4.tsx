@@ -4,12 +4,12 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import {
-    Animated,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  Animated,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { FormDataContext } from "../../Context/FormDataContext";
 
@@ -19,6 +19,9 @@ export default function FormScreen4() {
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   const animatedValue = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    console.log("📝 Final Collected Form Data:", formData);
+  }, []);
 
   useEffect(() => {
     Animated.loop(
@@ -88,7 +91,7 @@ export default function FormScreen4() {
                 month: "long",
                 day: "numeric",
               })
-            : " Select your last visit date"}
+            : " Select your last visit date (optional)"}
         </Text>
       </TouchableOpacity>
 
@@ -99,7 +102,14 @@ export default function FormScreen4() {
           maximumDate={new Date()}
           onChange={(_, date) => {
             setShowDatePicker(false);
-            if (date) setFormData({ ...formData, lastVisit: date });
+            if (date) {
+              const onlyDate = new Date(
+                date.getFullYear(),
+                date.getMonth(),
+                date.getDate()
+              );
+              setFormData({ ...formData, lastVisit: onlyDate });
+            }
           }}
         />
       )}
@@ -114,7 +124,10 @@ export default function FormScreen4() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={() => console.log("Final Data:", formData)}
+          onPress={() => {
+            console.log("Final Data:", formData);
+            router.push("/profile"); // example redirect
+          }}
           style={{ borderRadius: 30 }}
         >
           <LinearGradient

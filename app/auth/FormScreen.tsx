@@ -9,7 +9,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useContext } from "react";
 import {
   Animated,
   Image,
@@ -25,15 +25,16 @@ import {
   View,
 } from "react-native";
 import validator from "validator";
+import { FormDataContext } from "@/Context/FormDataContext";
 
 export default function FormScreen1() {
   const router = useRouter();
-
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [dob, setDob] = useState<Date | undefined>();
-  const [gender, setGender] = useState("");
-  const [bloodGroup, setBloodGroup] = useState("");
+  const { formData, setFormData } = useContext(FormDataContext);
+  const [name, setName] = useState(formData.name || "");
+  const [email, setEmail] = useState(formData.email || "");
+  const [dob, setDob] = useState<Date | undefined>(formData.dob || undefined);
+  const [gender, setGender] = useState(formData.gender || "");
+  const [bloodGroup, setBloodGroup] = useState(formData.bloodGroup || "");
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [focusedField, setFocusedField] = useState("");
   const [emailError, setEmailError] = useState("");
@@ -70,6 +71,14 @@ export default function FormScreen1() {
   }, []);
 
   const handleNext = () => {
+    setFormData({
+      ...formData,
+      name,
+      email,
+      dob,
+      gender,
+      bloodGroup,
+    });
     router.push("/auth/FormScreen2");
   };
 
@@ -227,7 +236,7 @@ export default function FormScreen1() {
                 style={[styles.picker, gender ? styles.pickerSelected : null]}
                 dropdownIconColor="#0284C5"
               >
-                <Picker.Item label="Select gender" value="" color="#888" />
+                <Picker.Item label="Gender" value="" color="#888" />
                 <Picker.Item
                   label="Male"
                   value="male"

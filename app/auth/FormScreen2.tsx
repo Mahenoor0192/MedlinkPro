@@ -1,10 +1,9 @@
+import { FormDataContext } from "@/Context/FormDataContext";
 import { AntDesign } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import React, { useContext, useEffect, useRef } from "react";
-
-import { FormDataContext } from "@/Context/FormDataContext";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import {
   Animated,
   Image,
@@ -17,10 +16,9 @@ import {
 
 export default function FormScreen2() {
   const router = useRouter();
-
   const { formData, setFormData } = useContext(FormDataContext);
-  const { height = 170, weight = 70 } = formData;
-
+  const [height, setHeight] = useState(formData.height || 170);
+  const [weight, setWeight] = useState(formData.weight || 70);
   const animatedValue = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -40,10 +38,27 @@ export default function FormScreen2() {
     ).start();
   }, []);
 
+  // const calculateBMI = () => {
+  //   const heightInM = (formData.height || 170) / 100;
+  //   const bmi = (formData.weight || 70) / (heightInM * heightInM);
+  //   return bmi.toFixed(1);
+  // };
+
   const calculateBMI = () => {
-    const heightInM = (formData.height || 170) / 100;
-    const bmi = (formData.weight || 70) / (heightInM * heightInM);
+    const heightInM = height / 100;
+    const bmi = weight / (heightInM * heightInM);
     return bmi.toFixed(1);
+  };
+
+  // Update context on slide finish
+  const updateHeight = (value) => {
+    setHeight(value);
+    setFormData((prev) => ({ ...prev, height: value }));
+  };
+
+  const updateWeight = (value) => {
+    setWeight(value);
+    setFormData((prev) => ({ ...prev, weight: value }));
   };
 
   const getBMICategory = () => {
@@ -114,13 +129,13 @@ export default function FormScreen2() {
             maximumValue={220}
             value={height}
             step={1}
-            onValueChange={(value) =>
-              setFormData({ ...formData, height: value })
-            }
+            onValueChange={setHeight} // Only local update
+            onSlidingComplete={updateHeight} // Save to context on finish
             minimumTrackTintColor="#0DB1E8"
             maximumTrackTintColor="#11C0B2"
             thumbTintColor="#0284C5"
           />
+
           <View style={styles.sliderLabels}>
             <Text style={styles.sliderLabel}>120 cm</Text>
             <Text style={styles.sliderLabel}>220 cm</Text>
@@ -135,13 +150,13 @@ export default function FormScreen2() {
             maximumValue={200}
             value={weight}
             step={1}
-            onValueChange={(value) =>
-              setFormData({ ...formData, weight: value })
-            }
+            onValueChange={setWeight}
+            onSlidingComplete={updateWeight}
             minimumTrackTintColor="#0DB1E8"
             maximumTrackTintColor="#11C0B2"
             thumbTintColor="#0284C5"
           />
+
           <View style={styles.sliderLabels}>
             <Text style={styles.sliderLabel}>30 kg</Text>
             <Text style={styles.sliderLabel}>200 kg</Text>
@@ -159,12 +174,21 @@ export default function FormScreen2() {
         <View style={styles.buttonRow}>
           <TouchableOpacity
             style={styles.prevButton}
-            onPress={() => router.back()}
+            onPress={() => {
+              setFormData((prev) => ({ ...prev, height, weight }));
+              // console.log("Form Data on Previous:", formData);
+              router.back();
+            }}
           >
             <Text style={styles.prevText}>Previous</Text>
           </TouchableOpacity>
+
           <TouchableOpacity
-            onPress={() => router.push("/auth/FormScreen3")}
+            onPress={() => {
+              setFormData((prev) => ({ ...prev, height, weight }));
+              // console.log("Form Data on Next:", formData);
+              router.push("/auth/FormScreen3");
+            }}
             style={{ borderRadius: 30 }}
           >
             <LinearGradient

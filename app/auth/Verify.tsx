@@ -1,20 +1,34 @@
-import { router, useLocalSearchParams } from 'expo-router';
+import { LinearGradient } from "expo-linear-gradient";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
-import { Image, StyleSheet, Text, TextInput, TouchableOpacity, View, Pressable } from "react-native";
-import { LinearGradient } from 'expo-linear-gradient';
+import {
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View
+} from "react-native";
 
 export default function Verify() {
   const [otp, setOtp] = useState("");
   const { phone } = useLocalSearchParams();
+  const [error, setError] = useState("");
 
   const handleVerify = () => {
+    if (!otp || otp.length < 6) {
+      setError("Please enter the OTP");
+      return;
+    }
+
+    setError("");
     console.log(`Verifying OTP: ${otp} for phone: ${phone}`);
-    router.push('/auth/FormScreen');
+    router.push("/auth/FormScreen");
   };
 
   return (
     <LinearGradient
-      colors={['#0284C5', '#11C0B2']} // ✅ Screen gradient background
+      colors={["#0284C5", "#11C0B2"]} // ✅ Screen gradient background
       style={styles.container}
     >
       <Image
@@ -29,18 +43,19 @@ export default function Verify() {
         <Text style={styles.title}>Verify Phone Number</Text>
         <Text style={styles.subtitle}>Enter the OTP sent to +91 {phone}</Text>
         <TextInput
-          style={styles.otpInput}
+          style={[styles.otpInput, error ? styles.errorBorder : null]}
           placeholder="Enter OTP"
           keyboardType="numeric"
           value={otp}
           onChangeText={setOtp}
           maxLength={6}
         />
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
         {/* ✅ Gradient Verify Button */}
         <Pressable style={styles.buttonWrapper} onPress={handleVerify}>
           <LinearGradient
-            colors={['#0284C5', '#11C0B2']}
+            colors={["#0284C5", "#11C0B2"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={styles.verifyButton}
@@ -93,12 +108,21 @@ const styles = StyleSheet.create({
   },
   otpInput: {
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: "#000",
     borderRadius: 10,
     padding: 15,
     fontSize: 18,
     textAlign: "center",
-    marginBottom: 20,
+    // marginBottom: 20,
+  },
+  errorBorder: {
+    borderColor: "red",
+  },
+  errorText: {
+    color: "red",
+    fontSize: 12,
+    marginBottom: 15,
+    // textAlign: "center",
   },
   buttonWrapper: {
     borderRadius: 30,
@@ -109,6 +133,7 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     alignItems: "center",
     justifyContent: "center",
+    marginTop:20,
   },
   buttonText: {
     color: "white",
