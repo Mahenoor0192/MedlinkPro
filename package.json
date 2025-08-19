@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
+    "@lottiefiles/dotlottie-react": "^0.15.0",
     "@react-native-community/datetimepicker": "^8.4.3",
     "@react-native-community/slider": "4.5.6",
     "@react-native-picker/picker": "2.11.1",

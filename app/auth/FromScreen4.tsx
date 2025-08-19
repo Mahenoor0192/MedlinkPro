@@ -126,7 +126,8 @@ export default function FormScreen4() {
         <TouchableOpacity
           onPress={() => {
             console.log("Final Data:", formData);
-            router.push("/profile"); // example redirect
+            // router.push("/screens/AppointmentsScreen"); // example redirect
+            router.replace("/(tabs)/ProfileScreen");
           }}
           style={{ borderRadius: 30 }}
         >
