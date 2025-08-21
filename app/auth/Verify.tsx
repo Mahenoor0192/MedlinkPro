@@ -22,8 +22,9 @@ export default function Verify() {
     }
 
     setError("");
+    //
     console.log(`Verifying OTP: ${otp} for phone: ${phone}`);
-    router.push("/auth/FormScreen");
+    router.push("/auth/UserInfo");
   };
 
   return (

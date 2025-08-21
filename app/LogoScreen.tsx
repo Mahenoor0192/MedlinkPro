@@ -8,8 +8,8 @@ export default function LogoScreen() {
   const router = useRouter();
 
   const handleNext = () => {
-    router.push('/onboarding/Onboarding_1');
-    // router.push('/(tabs)/AppointmentsScreen');
+    // router.push('/onboarding/Onboarding_1');
+    router.push('/(tabs)/AppointmentsScreen');
   };
 
   return (

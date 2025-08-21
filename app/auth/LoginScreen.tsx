@@ -10,11 +10,25 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+// import AsyncStorage from "@react-native-async-storage/async-storage";
+// import { loginUser } from "../api/auth";
 
 export default function Login() {
   const [phone, setPhone] = useState("");
   const router = useRouter();
   const [error, setError] = useState('');
+  // const router = useRouter();
+
+  // const handleLogin = async () => {
+  //   try {
+  //     const data = await loginUser(username, password);
+  //     await AsyncStorage.setItem("token", data.token);
+  //     console.log("✅ Token saved:", data.token);
+  //     router.replace("/(tabs)/HomeScreen");
+  //   } catch (error: any) {
+  //     alert("Login failed: " + (error.response?.data?.detail || error.message));
+  //   }
+  // };
 
   const handleContinue = () => {
     const cleanedPhone = phone.replace(/\D/g, ""); // Remove non-digit characters
